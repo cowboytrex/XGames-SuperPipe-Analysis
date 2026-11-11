@@ -90,3 +90,33 @@ def highest_single_score(athletes):
         name for name, scores in athletes.items()
         if best_score(scores) == highest
     ]
+
+
+def load_runs(filepath=None):
+    """Load run scores grouped by year, round, and athlete."""
+    if filepath is None:
+        filepath = BASE / "data" / "superpipe_runs.csv"
+
+    runs = {}
+
+    with open(filepath, "r", newline="") as file:
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            year = int(row["year"])
+            round_name = row["round"]
+            athlete = row["athlete"]
+            score = float(row["score"])
+
+            if year not in runs:
+                runs[year] = {}
+
+            if round_name not in runs[year]:
+                runs[year][round_name] = {}
+
+            if athlete not in runs[year][round_name]:
+                runs[year][round_name][athlete] = []
+
+            runs[year][round_name][athlete].append(score)
+
+    return runs
