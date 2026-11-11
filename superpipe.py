@@ -1,29 +1,9 @@
-
 import csv
 from pathlib import Path
-from collections import defaultdict
 
 # Project directory
 BASE = Path(__file__).resolve().parent
-DATA_FILE = BASE / "data" / "superpipe_scores.csv"
-
-
-def load_scores(filepath=None):
-    """Load athlete scores from CSV into a dictionary."""
-    if filepath is None:
-        filepath = DATA_FILE
-
-    scores = defaultdict(list)
-
-    with open(filepath, "r", newline="") as file:
-        reader = csv.DictReader(file)
-
-        for row in reader:
-            athlete = row["athlete"]
-            score = float(row["score"])
-            scores[athlete].append(score)
-
-    return dict(scores)
+DATA_FILE = BASE / "data" / "superpipe_runs.csv"
 
 
 def average_score(scores):
@@ -95,7 +75,7 @@ def highest_single_score(athletes):
 def load_runs(filepath=None):
     """Load run scores grouped by year, round, and athlete."""
     if filepath is None:
-        filepath = BASE / "data" / "superpipe_runs.csv"
+        filepath = DATA_FILE
 
     runs = {}
 
