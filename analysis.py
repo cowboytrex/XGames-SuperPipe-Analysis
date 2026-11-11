@@ -84,9 +84,7 @@ if eligible:
 print("\nGraphs saved in:", GRAPH_DIR)
 
 
-# --------------------------------------------------
 # Individual Run Analysis by Year
-# --------------------------------------------------
 
 for year, rounds in sorted(run_data.items()):
     if "final" not in rounds:
