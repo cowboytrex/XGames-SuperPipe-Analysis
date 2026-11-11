@@ -1,9 +1,11 @@
-
 from pathlib import Path
+from statistics import pstdev
+
 import matplotlib.pyplot as plt
 
 from superpipe import (
     load_scores,
+    load_runs,
     average_score,
     best_score,
     consistency,
@@ -11,6 +13,7 @@ from superpipe import (
     highest_average,
     highest_single_score,
 )
+
 
 BASE = Path(__file__).resolve().parent
 GRAPH_DIR = BASE / "graphs"
@@ -70,3 +73,93 @@ if eligible:
     plt.close()
 
 print("\nGraphs saved in:", GRAPH_DIR)
+
+
+# --------------------------------------------------
+# Individual Run Analysis
+# --------------------------------------------------
+
+run_data = load_runs()
+
+for year, rounds in sorted(run_data.items()):
+    if "final" not in rounds:
+        continue
+
+    athletes_runs = rounds["final"]
+
+    print(f"\n{year} WOMEN'S SKI SUPERPIPE - FINAL RUNS")
+    print("-" * 50)
+
+    names = []
+    averages = []
+    best_scores = []
+    ranges = []
+    deviations = []
+
+    for athlete, scores in athletes_runs.items():
+        avg = average_score(scores)
+        best = best_score(scores)
+        score_range = consistency(scores)
+        std_dev = pstdev(scores)
+
+        names.append(athlete)
+        averages.append(avg)
+        best_scores.append(best)
+        ranges.append(score_range)
+        deviations.append(std_dev)
+
+        print(
+            f"{athlete}: "
+            f"Best={best:.2f}, "
+            f"Average={avg:.2f}, "
+            f"Range={score_range:.2f}, "
+            f"Std Dev={std_dev:.2f}"
+        )
+
+    # Graph 4: Best score vs average run score
+    x = range(len(names))
+    width = 0.35
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(
+        [i - width / 2 for i in x],
+        best_scores,
+        width,
+        label="Best run"
+    )
+    plt.bar(
+        [i + width / 2 for i in x],
+        averages,
+        width,
+        label="Average run"
+    )
+
+    plt.xticks(list(x), names, rotation=20)
+    plt.ylabel("Score")
+    plt.title(f"{year} Women's Ski SuperPipe - Best vs Average")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(GRAPH_DIR / f"{year}_best_vs_average.png")
+    plt.close()
+
+    # Graph 5: Score range
+    plt.figure(figsize=(10, 6))
+    plt.bar(names, ranges)
+    plt.ylabel("Score Range (Lower = More Consistent)")
+    plt.title(f"{year} Women's Ski SuperPipe - Run Consistency")
+    plt.xticks(rotation=20)
+    plt.tight_layout()
+    plt.savefig(GRAPH_DIR / f"{year}_run_consistency.png")
+    plt.close()
+
+    # Graph 6: Standard deviation
+    plt.figure(figsize=(10, 6))
+    plt.bar(names, deviations)
+    plt.ylabel("Standard Deviation (Lower = More Consistent)")
+    plt.title(f"{year} Women's Ski SuperPipe - Score Variation")
+    plt.xticks(rotation=20)
+    plt.tight_layout()
+    plt.savefig(GRAPH_DIR / f"{year}_score_variation.png")
+    plt.close()
+
+    print(f"\nSaved three run-level graphs for {year}.")
